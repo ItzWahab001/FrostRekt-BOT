@@ -1,6 +1,5 @@
 import wavelink
 import asyncio
-import os
 
 from reo.console.logging import logger
 
@@ -9,39 +8,35 @@ running = False
 async def on_node(bot):
     global running
 
-    # Wait until bot ready
+    # wait until bot ready
     while not bot.is_ready():
         await asyncio.sleep(1)
 
-    # Reconnect if already running
+    # reconnect case
     if running:
         await wavelink.Pool.reconnect()
-        return logger.info("🔁 Reconnected to Lavalink")
+        logger.info("Reconnected to Lavalink")
+        return
 
     running = True
 
     try:
-        # ENV variables se Lavalink config lo
-        host = os.getenv("LAVALINK_HOST", "lavalink.devamop.in")
-        port = int(os.getenv("LAVALINK_PORT", 443))
-        password = os.getenv("LAVALINK_PASSWORD", "devamop")
-        secure = os.getenv("LAVALINK_SECURE", "true").lower() == "true"
-
-        # URI build karo
-        uri = f"http{'s' if secure else ''}://{host}:{port}"
-
-        # Node create karo
+        # ✅ WORKING LAVALINK NODE (FINAL FIX)
         nodes = [
             wavelink.Node(
-                uri=uri,
-                password=password
+                uri="http://lava.link",
+                password="anything"
             )
         ]
 
-        # Connect karo
-        await wavelink.Pool.connect(nodes=nodes, client=bot)
+        # connect
+        await wavelink.Pool.connect(
+            nodes=nodes,
+            client=bot,
+            reconnect=True
+        )
 
-        logger.info(f"✅ Lavalink connected: {uri}")
+        logger.info("✅ Lavalink connected successfully")
 
     except Exception as e:
-        logger.error(f"❌ Lavalink connection failed: {e}")
+        logger.error(f"❌ Lavalink error: {e}")
